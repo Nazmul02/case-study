@@ -51,7 +51,6 @@ export default {
 
         const logout = async () => {
             await store.dispatch('logout')
-            router.push('/login')
         }
 
         const navItems = computed(() => {

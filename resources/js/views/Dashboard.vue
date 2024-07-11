@@ -31,9 +31,15 @@
 <script>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useStore } from 'vuex'
+import { useRouter, useRoute } from 'vue-router'
+import router from "../router";
+
 
 export default {
     setup() {
+        const store = useStore()
+        const router = useRouter()
         const balance = ref(0)
         const totalDeposits = ref(0)
         const totalTransfers = ref(0)
@@ -47,7 +53,13 @@ export default {
                 totalTransfers.value = response.data.totalTransfers
                 lastTransaction.value = response.data.lastTransaction
             } catch (error) {
-                console.error('Failed to fetch dashboard data', error)
+                console.log('Failed to fetch dashboard data', error)
+                if(error.response.data.message === 'Unauthenticated.')
+                {
+                    router.push('/login')
+
+                }
+
             }
         }
 

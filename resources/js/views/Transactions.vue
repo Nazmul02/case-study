@@ -14,7 +14,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="transaction in transactions.data" :key="transaction.id">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ transaction.type }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 uppercase">{{ transaction.type }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ transaction.amount }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(transaction.created_at) }}</td>
                 </tr>
@@ -57,9 +57,13 @@
 <script>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useStore } from 'vuex'
+import {useRouter} from "vue-router";
 
 export default {
     setup() {
+        const store = useStore()
+        const router = useRouter()
         const transactions = ref({})
 
         const loadTransactions = async (page = 1) => {
@@ -67,6 +71,10 @@ export default {
                 const response = await axios.get(`/api/transactions?page=${page}`)
                 transactions.value = response.data
             } catch (error) {
+               if(error.response.data.message === 'Unauthenticated.'){
+                   router.push('/login')
+               }
+
                 console.error('Failed to fetch transactions', error)
             }
         }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -53,15 +54,19 @@ class TransactionController extends Controller
         }
     }
 
-        public function transfer(Request $request)
+    public function transfer(Request $request)
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'to_account_id' => 'required|exists:accounts,id',
+            'to_account_id' => 'required',
         ]);
 
         $fromAccount = $request->user()->account;
-        $toAccount = Account::findOrFail($request->to_account_id);
+
+        $toAccount = Account::firstOrNew([
+            'id' => $request->to_account_id,
+            'user_id' => User::factory()->create()->id
+        ]);
 
         if ($fromAccount->balance < $request->amount) {
             return response()->json(['message' => 'Insufficient funds'], 400);

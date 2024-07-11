@@ -10,8 +10,8 @@ import store from '../store'
 
 const routes = [
     { path: '/', component: Home },
-    { path: '/login', component: Login , meta: {requiresAuth: false}},
-    { path: '/register', component: Register },
+    { path: '/login', component: Login },
+    { path: '/register', component: Register, meta: {guestOnly : true} },
     {path: '/dashboard', component: Dashboard, meta: { requiresAuth: true }},
     { path: '/deposit', component: Deposit, meta: { requiresAuth: true } },
     { path: '/transfer', component: Transfer, meta: { requiresAuth: true } },
@@ -24,15 +24,23 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+    const isAuthenticated = store.getters.isAuthenticated
     if (to.matched.some(record => record.meta.requiresAuth)) {
-        if (!store.getters.isAuthenticated) {
+        if (!isAuthenticated) {
             next('/login')
+        } else {
+            next()
+        }
+    } else if (to.matched.some(record => record.meta.guestOnly)) {
+        if (isAuthenticated) {
+            next('/dashboard')
         } else {
             next()
         }
     } else {
         next()
     }
+
 })
 
 export default router
